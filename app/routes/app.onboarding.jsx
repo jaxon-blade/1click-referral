@@ -5,7 +5,7 @@ import {
   InlineStack,
 } from "@shopify/polaris";
 import React, { useEffect, useState } from "react";
-import { useFetcher, useNavigate, useSubmit } from "@remix-run/react";
+import { useFetcher, useSubmit } from "@remix-run/react";
 const OnBoarding = () => {
   const fetch = useFetcher();
   const [isNavigating, setIsNavigating] = useState(false);
