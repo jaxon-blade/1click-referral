@@ -1,0 +1,12 @@
+Step 1
+
+npm i -f
+
+Step 2
+
+npm run dev -- --reset
+
+Step 3
+
+Copy server url and paste in Checkout.jsx-> APPURL
+

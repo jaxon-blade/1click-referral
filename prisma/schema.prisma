@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id                     String    @id
+  shop                   String    @unique
+  state                  String
+  isOnline               Boolean   @default(false)
+  scope                  String?
+  expires                DateTime?
+  programStatus          Boolean   @default(true)
+  accessToken            String
+  userId                 BigInt?
+  firstName              String?
+  lastName               String?
+  email                  String?
+  accountOwner           Boolean   @default(false)
+  locale                 String?
+  collaborator           Boolean?  @default(false)
+  emailVerified          Boolean?  @default(false)
+  referralCodeGeneration Int?
+  createdAt              DateTime  @default(now())
+
+  ThankYouWidgetSettings ThankYouWidgetSettings?
+  Rewards                Rewards[]
+  SocialMediaSettings    SocialMediaSettings?
+  ReferralsUsed          ReferralsUsed[]
+  EmailTemplate          EmailTemplate?
+}
+
+model ThankYouWidgetSettings {
+  id           Int      @id @default(autoincrement())
+  title        String?
+  descrption   String?
+  shareText    String?
+  shareNowText String?
+  shop         String   @unique
+  createdAt    DateTime @default(now())
+
+  Session Session @relation(fields: [shop], references: [shop])
+}
+
+model Rewards {
+  id                      Int      @id @default(autoincrement())
+  title                   String?
+  discountType            String?
+  discountValueType       String?
+  appliesTo               String?
+  minAmount_checked       Boolean? @default(false)
+  expiration_days_checked Boolean? @default(false)
+  minAmount               Float?
+  combines_with           Json?
+  expiration_days         Int?
+  discountValue           Float?
+  collections             Json
+  products                Json
+  shop                    String // Removed @unique to allow multiple rewards per shop
+  createdAt               DateTime @default(now())
+
+  Session Session @relation(fields: [shop], references: [shop])
+}
+
+model SocialMediaSettings {
+  id             Int      @id @default(autoincrement())
+  facebook       Boolean?
+  twitter        Boolean?
+  twitterMessage String?
+  email          Boolean?
+  emailMessage   String?
+  shop           String   @unique
+  createdAt      DateTime @default(now())
+
+  Session Session @relation(fields: [shop], references: [shop])
+}
+
+model ReferralsUsed {
+  id                   Int      @id @default(autoincrement())
+  advocateEmail        String?
+  discountUsed         String?
+  referredFriendsCount Int?
+  salesFromReferral    Float?   @default(0)
+  createdAt            DateTime @default(now())
+  shop                 String
+  orderId              String?
+
+  Session Session @relation(fields: [shop], references: [shop])
+}
+
+model EmailTemplate {
+  id         String   @id @default(cuid())
+  sender     String
+  subject    String
+  emailBody  String
+  buttonText String
+  createdAt  DateTime @default(now())
+  shop       String   @unique
+
+  Session Session @relation(fields: [shop], references: [shop])
+}

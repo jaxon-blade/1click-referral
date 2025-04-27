@@ -1,0 +1,34 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "9c7f42643aee96b883b616e62ad81d5a"
+name = "profitable-franchise-app"
+handle = "profitable-franchise-app-5"
+application_url = "https://pairs-uploaded-facilities-international.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "test-433.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customers,read_discounts,read_orders,read_products,write_discounts,write_price_rules"
+
+[auth]
+redirect_urls = [
+  "https://pairs-uploaded-facilities-international.trycloudflare.com/auth/callback",
+  "https://pairs-uploaded-facilities-international.trycloudflare.com/auth/shopify/callback",
+  "https://pairs-uploaded-facilities-international.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2025-01"
+
+[app_proxy]
+url = "https://pairs-uploaded-facilities-international.trycloudflare.com/app/proxy"
+subpath = "test"
+prefix = "apps"
+
+[pos]
+embedded = false
