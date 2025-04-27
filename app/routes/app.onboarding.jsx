@@ -3,18 +3,16 @@ import {
   Button,
   Card,
   InlineStack,
-  SkeletonThumbnail,
 } from "@shopify/polaris";
 import React, { useEffect, useState } from "react";
 import { useFetcher, useNavigate, useSubmit } from "@remix-run/react";
 const OnBoarding = () => {
-  const navigate = useNavigate();
   const fetch = useFetcher();
   const [isNavigating, setIsNavigating] = useState(false);
   const submit =useSubmit()
   useEffect(() => {
     fetch.load("/app/settings");
-  }, []);
+  }, [fetch]);
 
   const handleNavigation = async () => {
     setIsNavigating(true);
@@ -23,8 +21,6 @@ const OnBoarding = () => {
       action: "/api/onboarding",
       encType: "application/json",
     });
-    console.log("Onboarding completed");
-    // navigate("/app/settings");
   };
 
   return (

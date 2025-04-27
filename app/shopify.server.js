@@ -2,6 +2,7 @@ import "@shopify/shopify-app-remix/adapters/node";
 import {
   ApiVersion,
   AppDistribution,
+  DeliveryMethod,
   shopifyApp,
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
@@ -29,9 +30,16 @@ const shopify = shopifyApp({
   hooks: {
     afterAuth: async (session) => {
       // Save the session to the database
+      await registerWebhooks( session );
       handleIntialInsertion(session.session);
     },
   },
+  webhooks: {
+    'app/uninstalled': {
+      deliveryMethod: DeliveryMethod.Http,
+      callbackUrl: '/webhooks/app/uninstalled',
+    },
+  }
 });
 
 const handleIntialInsertion = async (session) => {
@@ -187,14 +195,63 @@ const handleIntialInsertion = async (session) => {
   });
   await sendEmail({
     to: getUserEmail.email,
-    subject: "We welcome you onboard",
-    html: `<p>Hey,</p><p><br></p><p>We are glad to have you onboard. We hope you enjoy our app.</p><p><br></p><p>Thank you.</p>`,
+    subject: "We Welcome You Onboard",
+    html: `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              background-color: #f4f7fa;
+              color: #333;
+              padding: 20px;
+            }
+            .email-container {
+              background-color: #ffffff;
+              border-radius: 8px;
+              padding: 30px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+              max-width: 600px;
+              margin: 0 auto;
+            }
+            h1 {
+              color: #2ecc71;
+              text-align: center;
+            }
+            p {
+              font-size: 16px;
+              line-height: 1.6;
+              text-align: center;
+            }
+            .footer {
+              text-align: center;
+              font-size: 14px;
+              margin-top: 20px;
+              color: #888;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <h1>Welcome to the Family!</h1>
+            <p>Hey,</p>
+            <p>We are thrilled to have you onboard and can't wait for you to enjoy everything our app has to offer!</p>
+            <p>We hope you have an amazing experience. If you need any assistance, feel free to reach out to us anytime.</p>
+            <p>Thank you for choosing us.</p>
+          </div>
+          <div class="footer">
+            <p>&copy; 2025 Your Company Name. All Rights Reserved.</p>
+          </div>
+        </body>
+      </html>
+    `
   });
-  await sendEmail({
-    to: "",
-    subject: "We got new customer",
-    html: `We found new customer ${getUserEmail.shop} with email ${getUserEmail.email}.`,
-  });
+  
+  // await sendEmail({
+  //   to: "",
+  //   subject: "We got new customer",
+  //   html: `We found new customer ${getUserEmail.shop} with email ${getUserEmail.email}.`,
+  // });
 };
 
 export default shopify;

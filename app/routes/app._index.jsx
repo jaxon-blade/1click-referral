@@ -1,102 +1,119 @@
 import {
   Badge,
-  Banner,
   Box,
   Grid,
   InlineStack,
   Page,
+  Spinner,
   Text,
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
 import CountBox from "../components/CountBox/CountBox";
-import {} from "@shopify/polaris-icons";
-import { Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useNavigate,
+  useNavigation,
+} from "@remix-run/react";
 import DashboardCard from "../components/DashboardCard/DashboardCard";
 import prisma from "../db.server";
-import { useEffect, useState } from "react";
-import { onLCP, onCLS, onFCP } from "web-vitals";
+import { useEffect } from "react";
+
 export const loader = async ({ request }) => {
-  const sessions = await authenticate.admin(request);
-  const referralsUsed = await prisma.referralsUsed.findMany({
-    where: {
-      shop: sessions.session.shop,
-    },
-  });
-  const shopInfo = await prisma.session.findFirst({
-    where: {
-      shop: sessions.session.shop,
-    },
-    select: {
-      programStatus: true,
-      shop: true,
-      onboardingCompleted: true,
-    },
-  });
-  return { referralsUsed, shopInfo };
+  const { session } = await authenticate.admin(request);
+  const { shop } = session;
+
+  const [referrals, shopInfo] = await Promise.all([
+    prisma.referralsUsed.findMany({ where: { shop } }),
+    prisma.session.findFirst({
+      where: { shop },
+      select: { programStatus: true, onboardingCompleted: true },
+    }),
+  ]);
+
+  const totals = referrals.reduce(
+    (acc, referral) => ({
+      friends: acc.friends + (referral.referredFriendsCount || 0),
+      sales: acc.sales + (referral.salesFromReferral || 0),
+    }),
+    { friends: 0, sales: 0 },
+  );
+
+  return {
+    totalAdvocates: referrals.length,
+    totalReferredFriends: totals.friends,
+    totalSales: totals.sales.toFixed(2),
+    programStatus: shopInfo?.programStatus || false,
+    onboardingCompleted: shopInfo?.onboardingCompleted || false,
+  };
 };
 
-const LEARN_MORE_URL =
-  "https://help.shopify.com/en/manual/checkout-settings/customize-checkout-configurations/checkout-apps#add-app";
-const TOTAL_ADVOCATES_TEXT = "Total Advocates";
-const TOTAL_REFERRED_FUNDS_TEXT = "Total referred funds";
-const SALES_FROM_REFERRALS_TEXT = "Sales from referrals";
-const REFERRAL_PROGRAM_TEXT = "Referral program";
-const VIEW_ADVOCATES_REPORT_TEXT = "View advocates, friends and sales report.";
-const PROGRAM_SETTINGS_TEXT = "Program settings";
-const CUSTOMIZE_PROGRAM_TEXT =
-  "Customize your referral program to match your brand.";
+const CARD_CONTENT = [
+  {
+    title: "Total Advocates",
+    path: "/app/referralprogram",
+    getCount: (data) => data.totalAdvocates,
+  },
+  {
+    title: "Total referred funds",
+    path: "/app/referralprogram",
+    getCount: (data) => data.totalReferredFriends,
+  },
+  {
+    title: "Sales from referrals",
+    path: "/app/referralprogram",
+    getCount: (data) => data.totalSales,
+  },
+];
+
+const DASHBOARD_CARDS = [
+  {
+    title: "Referral program",
+    description: "View advocates, friends and sales report.",
+    buttonText: "View report",
+    icon: "ChartVerticalFilledIcon",
+    path: "/app/referralprogram",
+  },
+  {
+    title: "Program settings",
+    description: "Customize your referral program to match your brand.",
+    buttonText: "Edit program",
+    icon: "SettingsFilledIcon",
+    path: "/app/settings",
+  },
+];
 
 export default function Index() {
-  const nevigate = useNavigate();
-  const { referralsUsed, shopInfo } = useLoaderData();
-  const { programStatus, onboardingCompleted } = shopInfo;
-  const [proifleId, setProfileId] = useState(null);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const totalReferredFriendsCount = referralsUsed.reduce(
-    (total, referral) => total + (referral.referredFriendsCount || 0),
-    0,
-  );
-  const totalSalesCount = referralsUsed.reduce(
-    (total, referral) => total + (referral.salesFromReferral || 0),
-    0,
-  );
+  const navigate = useNavigate();
+  const navigation = useNavigation();
+  const loaderData = useLoaderData();
+  const { programStatus, onboardingCompleted } = loaderData;
 
   useEffect(() => {
-    fetch("/api/checkout")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch checkout data");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data) {
-          setProfileId(data[0]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching checkout data:", error);
-      });
-  }, []);
-  useEffect(() => {
-    onLCP(console.log);
-    onFCP(console.log);
-    onCLS(console.log);
-  }, []);
-  const Fetcher = useFetcher();
-  useEffect(() => {
-    Fetcher.load("/app/settings"); // preloads data
-  }, []);
-  const handleNavigation = () => {
-    setIsNavigating(true);
-    nevigate("/app/settings");
+    if (!onboardingCompleted) navigate("/app/onboarding");
+  }, [onboardingCompleted, navigate]);
+
+
+  if (!onboardingCompleted) {
+    return (
+      <Page>
+        <Box
+          padding={400}
+          style={{
+            width: "100vw",
+            height: "100vh",
+            display: "grid",
+            placeContent: "center",
+          }}
+        >
+          <Spinner size="large" />
+        </Box>
+      </Page>
+    );
+  }
+  const handleNavigation = (path) => () => {
+    navigate(path);
   };
-
-  useEffect(() => {
-    if (shopInfo && !onboardingCompleted) {
-      nevigate("/app/onboarding");
-    }
-  }, [onboardingCompleted]);
 
   return (
     <Page
@@ -108,45 +125,39 @@ export default function Index() {
       }
     >
       <Box paddingInline={100}>
-        <Box paddingBlock={"200"}></Box>
+        <SpacingBox />
+
         <Grid columns={{ xs: 1, sm: 1, md: 2, lg: 3 }}>
-          <CountBox title={TOTAL_ADVOCATES_TEXT} count={referralsUsed.length} />
-          <CountBox
-            title={TOTAL_REFERRED_FUNDS_TEXT}
-            count={totalReferredFriendsCount}
-          />
-          <CountBox
-            title={SALES_FROM_REFERRALS_TEXT}
-            count={totalSalesCount.toFixed(2)}
-          />
+          {CARD_CONTENT.map(({ title, getCount }, index) => (
+            <CountBox key={index} title={title} count={getCount(loaderData)} />
+          ))}
         </Grid>
-        <Box paddingBlock={"200"}></Box>
-        <DashboardCard
-          title={REFERRAL_PROGRAM_TEXT}
-          description={VIEW_ADVOCATES_REPORT_TEXT}
-          buttonText="View report"
-          iconName="ChartVerticalFilledIcon"
-          onClick={() => {
-            nevigate("/app/referralprogram");
-          }}
-        />
-        <Box paddingBlock={"200"}></Box>
-        <DashboardCard
-          title={PROGRAM_SETTINGS_TEXT}
-          description={CUSTOMIZE_PROGRAM_TEXT}
-          buttonText="Edit program"
-          iconName="SettingsFilledIcon"
-          loading={isNavigating}
-          onClick={handleNavigation}
-        />
-        <Box paddingBlock={"200"}></Box>
-        <Box paddingBlock={"200"}></Box>
+
+        <SpacingBox />
+
+        {DASHBOARD_CARDS.map((card, index) => {
+          const isNavigatingToCard =
+            navigation.location?.pathname === card.path;
+          return (
+            <div key={index}>
+              <DashboardCard
+                {...card}
+                loading={navigation.state === "loading" && isNavigatingToCard}
+                onClick={handleNavigation(card.path)}
+              />
+              <SpacingBox />
+            </div>
+          );
+        })}
+
         <InlineStack align="center">
           <Text>
-            Learn More <Link>1click</Link>
+            Learn More <Link to="/app/documentation">Documentation</Link>
           </Text>
         </InlineStack>
       </Box>
     </Page>
   );
 }
+
+const SpacingBox = () => <Box paddingBlock="200" />;

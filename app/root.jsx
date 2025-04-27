@@ -5,7 +5,13 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { Crisp } from "crisp-sdk-web";
+import { useEffect } from "react";
 export default function App() {
+  useEffect(() => {
+    Crisp.configure("234234234241234134");
+  }, []);
+
   return (
     <html>
       <head>

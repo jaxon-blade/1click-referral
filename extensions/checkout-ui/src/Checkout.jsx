@@ -18,7 +18,8 @@ export default reactExtension("purchase.thank-you.block.render", () => (
 
 function Extension() {
   const translate = useTranslate();
-  const APPURL = "https://illustration-velocity-jesus-zope.trycloudflare.com";
+  const APPURL =
+    "https://subscription-surrounded-fares-parent.trycloudflare.com";
   const { orderConfirmation, shop } = useApi();
   const orderId = orderConfirmation.current?.order?.id.replace(
     "OrderIdentity",
@@ -81,7 +82,7 @@ function Extension() {
   }
   // Error state
   if (error) {
-    return <Banner status="critical">{translate("error.loading_data")}</Banner>;
+    return <Banner status="critical">Something went wrong</Banner>;
   }
 
   return (
