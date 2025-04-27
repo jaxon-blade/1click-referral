@@ -24,6 +24,7 @@ model Session {
   accessToken            String
   userId                 BigInt?
   firstName              String?
+  onboardingCompleted    Boolean   @default(false)
   lastName               String?
   email                  String?
   accountOwner           Boolean   @default(false)

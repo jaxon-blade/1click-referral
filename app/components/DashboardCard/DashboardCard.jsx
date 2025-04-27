@@ -16,7 +16,14 @@ const iconMap = {
   SettingsFilledIcon: SettingsFilledIcon,
 };
 
-function DashboardCard({ title, description, buttonText, iconName, onClick }) {
+function DashboardCard({
+  title,
+  description,
+  buttonText,
+  iconName,
+  onClick,
+  loading,
+}) {
   const IconComponent = iconMap[iconName] || ChartVerticalFilledIcon;
   return (
     <Card>
@@ -28,7 +35,9 @@ function DashboardCard({ title, description, buttonText, iconName, onClick }) {
             <Text>{description}</Text>
           </BlockStack>
         </InlineStack>
-        <Button onClick={onClick}>{buttonText}</Button>
+        <Button onClick={onClick} loading={loading}>
+          {buttonText}
+        </Button>
       </InlineStack>
     </Card>
   );

@@ -10,7 +10,7 @@ import {
 import { authenticate } from "../shopify.server";
 import CountBox from "../components/CountBox/CountBox";
 import {} from "@shopify/polaris-icons";
-import { Link, useLoaderData, useNavigate } from "@remix-run/react";
+import { Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
 import DashboardCard from "../components/DashboardCard/DashboardCard";
 import prisma from "../db.server";
 import { useEffect, useState } from "react";
@@ -29,6 +29,7 @@ export const loader = async ({ request }) => {
     select: {
       programStatus: true,
       shop: true,
+      onboardingCompleted: true,
     },
   });
   return { referralsUsed, shopInfo };
@@ -48,8 +49,9 @@ const CUSTOMIZE_PROGRAM_TEXT =
 export default function Index() {
   const nevigate = useNavigate();
   const { referralsUsed, shopInfo } = useLoaderData();
-  const { programStatus, shop } = shopInfo;
+  const { programStatus, onboardingCompleted } = shopInfo;
   const [proifleId, setProfileId] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
   const totalReferredFriendsCount = referralsUsed.reduce(
     (total, referral) => total + (referral.referredFriendsCount || 0),
     0,
@@ -58,6 +60,7 @@ export default function Index() {
     (total, referral) => total + (referral.salesFromReferral || 0),
     0,
   );
+
   useEffect(() => {
     fetch("/api/checkout")
       .then((response) => {
@@ -75,12 +78,26 @@ export default function Index() {
         console.error("Error fetching checkout data:", error);
       });
   }, []);
-  const url = `https://${shop}/admin/settings/checkout/editor/profiles/${proifleId}?page=thank-you&context=apps`;
   useEffect(() => {
     onLCP(console.log);
     onFCP(console.log);
     onCLS(console.log);
   }, []);
+  const Fetcher = useFetcher();
+  useEffect(() => {
+    Fetcher.load("/app/settings"); // preloads data
+  }, []);
+  const handleNavigation = () => {
+    setIsNavigating(true);
+    nevigate("/app/settings");
+  };
+
+  useEffect(() => {
+    if (shopInfo && !onboardingCompleted) {
+      nevigate("/app/onboarding");
+    }
+  }, [onboardingCompleted]);
+
   return (
     <Page
       title="Referral program"
@@ -91,22 +108,6 @@ export default function Index() {
       }
     >
       <Box paddingInline={100}>
-        {/* <Banner
-        title="ClickReferral Checkout app block"
-        tone="warning"
-        action={{ content: "Open checkout editor", url: url, target: "_blank" }}
-        secondaryAction={{
-          content: "Learn more",
-          url: LEARN_MORE_URL,
-        }}
-        onDismiss={() => {}}
-      >
-        <p>
-          In order for your widget to display on your "Thank you" and "Order
-          status" pages, go to the checkout editor and add 1ClickReferral
-          Checkout app block.
-        </p>
-      </Banner> */}
         <Box paddingBlock={"200"}></Box>
         <Grid columns={{ xs: 1, sm: 1, md: 2, lg: 3 }}>
           <CountBox title={TOTAL_ADVOCATES_TEXT} count={referralsUsed.length} />
@@ -135,9 +136,8 @@ export default function Index() {
           description={CUSTOMIZE_PROGRAM_TEXT}
           buttonText="Edit program"
           iconName="SettingsFilledIcon"
-          onClick={() => {
-            nevigate("/app/settings");
-          }}
+          loading={isNavigating}
+          onClick={handleNavigation}
         />
         <Box paddingBlock={"200"}></Box>
         <Box paddingBlock={"200"}></Box>
