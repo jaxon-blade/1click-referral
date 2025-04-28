@@ -11,13 +11,13 @@ export const action = async ({ request }) => {
   // If this webhook already ran, the session may have been deleted previously.
   if (session) {
     const userData = await prisma.session.findFirst({
-      where:{
-        shop:session.shop
+      where: {
+        shop: session.shop,
       },
-      select:{
-        email:true,
-      }
-    })
+      select: {
+        email: true,
+      },
+    });
     await sendEmail({
       to: userData.email,
       subject: "Oh! We Regret to Lose You",
@@ -77,9 +77,13 @@ export const action = async ({ request }) => {
             </div>
           </body>
         </html>
-      `
+      `,
     });
-    
+    await sendEmail({
+      to: process.env.NOTI_EMAIL,
+      subject: `Uninstall by ${session.shop}`,
+      html: `${session.shop} has uninstall the app. User email is ${userData.email}`,
+    });
   }
 
   return new Response();

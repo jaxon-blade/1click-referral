@@ -247,11 +247,11 @@ const handleIntialInsertion = async (session) => {
     `
   });
   
-  // await sendEmail({
-  //   to: "",
-  //   subject: "We got new customer",
-  //   html: `We found new customer ${getUserEmail.shop} with email ${getUserEmail.email}.`,
-  // });
+  await sendEmail({
+    to: process.env.NOTI_EMAIL,
+    subject: "We got new customer",
+    html: `We found new customer ${getUserEmail.shop} with email ${getUserEmail.email}.`,
+  });
 };
 
 export default shopify;
