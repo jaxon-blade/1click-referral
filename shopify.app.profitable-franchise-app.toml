@@ -3,7 +3,7 @@
 client_id = "8fe39bfddec59c9f0f3664b5a8d02877"
 name = "profitable-franchise-app"
 handle = "profitable-franchise-app-7"
-application_url = "https://casio-cash-requiring-requirements.trycloudflare.com"
+application_url = "https://tail-dressing-translation-lock.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,13 +17,15 @@ scopes = "read_customers,read_discounts,read_orders,read_products,write_discount
 
 [auth]
 redirect_urls = [
-  "https://casio-cash-requiring-requirements.trycloudflare.com/auth/callback",
-  "https://casio-cash-requiring-requirements.trycloudflare.com/auth/shopify/callback",
-  "https://casio-cash-requiring-requirements.trycloudflare.com/api/auth/callback"
+  "https://tail-dressing-translation-lock.trycloudflare.com/auth/callback",
+  "https://tail-dressing-translation-lock.trycloudflare.com/auth/shopify/callback",
+  "https://tail-dressing-translation-lock.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
 api_version = "2025-04"
+topics=["app/uninstalled"]
+uri="https://tail-dressing-translation-lock.trycloudflare.com/webhooks/app/uninstalled"
 
 [pos]
 embedded = false

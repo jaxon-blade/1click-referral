@@ -1,5 +1,4 @@
 import { authenticate } from "../shopify.server";
-import db from "../db.server";
 import { sendEmail } from "../utils/sendEmail";
 import prisma from "../db.server";
 

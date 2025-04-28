@@ -19,7 +19,7 @@ export default reactExtension("purchase.thank-you.block.render", () => (
 function Extension() {
   const translate = useTranslate();
   const APPURL =
-    "https://subscription-surrounded-fares-parent.trycloudflare.com";
+    "https://casio-cash-requiring-requirements.trycloudflare.com";
   const { orderConfirmation, shop } = useApi();
   const orderId = orderConfirmation.current?.order?.id.replace(
     "OrderIdentity",
