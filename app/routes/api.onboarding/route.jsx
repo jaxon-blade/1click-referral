@@ -11,7 +11,6 @@ export const action = async ({ request }) => {
       onboardingCompleted: true,
     },
   });
-  console.log("Onboarding completed for session:", session.id);
   // Save the session cookie
   return redirect("/app/settings");
 };

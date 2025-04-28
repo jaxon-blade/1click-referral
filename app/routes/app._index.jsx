@@ -100,7 +100,7 @@ export default function Index() {
         <Box
           padding={400}
           style={{
-            width: "100vw",
+            width: "100%",
             height: "100vh",
             display: "grid",
             placeContent: "center",

@@ -18,6 +18,12 @@ export const action = async ({ request }) => {
         email: true,
       },
     });
+    if (topic === "APP_UNINSTALLED") {
+      await prisma.session.delete({
+        where: { shop },
+      });
+    }
+
     await sendEmail({
       to: userData.email,
       subject: "Oh! We Regret to Lose You",

@@ -50,7 +50,7 @@ model ThankYouWidgetSettings {
   shop         String   @unique
   createdAt    DateTime @default(now())
 
-  Session Session @relation(fields: [shop], references: [shop])
+  Session Session @relation(fields: [shop], references: [shop], onDelete: Cascade)
 }
 
 model Rewards {
@@ -70,7 +70,7 @@ model Rewards {
   shop                    String // Removed @unique to allow multiple rewards per shop
   createdAt               DateTime @default(now())
 
-  Session Session @relation(fields: [shop], references: [shop])
+  Session Session @relation(fields: [shop], references: [shop], onDelete: Cascade)
 }
 
 model SocialMediaSettings {
@@ -83,7 +83,7 @@ model SocialMediaSettings {
   shop           String   @unique
   createdAt      DateTime @default(now())
 
-  Session Session @relation(fields: [shop], references: [shop])
+  Session Session @relation(fields: [shop], references: [shop], onDelete: Cascade)
 }
 
 model ReferralsUsed {
@@ -96,7 +96,7 @@ model ReferralsUsed {
   shop                 String
   orderId              String?
 
-  Session Session @relation(fields: [shop], references: [shop])
+  Session Session @relation(fields: [shop], references: [shop], onDelete: Cascade)
 }
 
 model EmailTemplate {
@@ -108,5 +108,5 @@ model EmailTemplate {
   createdAt  DateTime @default(now())
   shop       String   @unique
 
-  Session Session @relation(fields: [shop], references: [shop])
+  Session Session @relation(fields: [shop], references: [shop], onDelete: Cascade)
 }

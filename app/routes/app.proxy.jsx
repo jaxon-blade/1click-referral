@@ -29,6 +29,7 @@ const fetchShopData = async (shop) => {
 };
 
 const fetchOrderDetails = async (shop, accessToken, order) => {
+  console.log(shop,accessToken)
   const query = `
     query Orders($id: ID!) {
       order(id: $id) {
@@ -141,7 +142,7 @@ export const loader = async ({ request }) => {
   const shop =
     url.searchParams.get("X-Shop-Domain") || url.searchParams.get("shop");
   const order = url.searchParams.get("order");
-
+  console.log(order)
   if (!shop) {
     return json(
       { success: false, message: "Shop parameter missing" },
@@ -183,6 +184,7 @@ export const loader = async ({ request }) => {
     session.accessToken,
     order,
   );
+  console.log(orderDetails)
   const existingDiscountCodes = orderDetails.data.order.discountCodes;
 
   const referralUsed = await prisma.referralsUsed.findFirst({
